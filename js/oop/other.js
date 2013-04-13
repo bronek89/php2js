@@ -1,39 +1,55 @@
-var A = (function () {
+var obj = {
+	clone: function(obj) {
+		var clone, property, value;
+		if (!obj || typeof obj !== 'object') {
+			return obj;
+		}
+		clone = typeof obj.pop === 'function' ? [] : {};
+		clone.__proto__ = obj.__proto__;
+		for (property in obj) {
+			if (obj.hasOwnProperty(property)) {
+				value = obj.property;
+				if (value && typeof value === 'object') {
+					clone[property] = obj.clone(value);
+				} else {
+					clone[property] = obj[property];
+				}
+			}
+		}
+		return clone;
+	}
+};
 	
-	var _A = function () {
-		this.property = 11;
-	};
-	_A.staticProperty = 10;
-	_A.staticMethod = _A.prototype.staticMethod = function () {
-		var self = _B;
-	};
-	_A.prototype.method = function () {
-		var $this = this;
-		var self = _A;
-		ref(this, self.prototype.staticMethod)();
-	};
-	return _A;
+var A = function () {
+	this.property = 11;
+};
+A.staticProperty = 10;
+A.staticMethod = A.prototype.staticMethod = function () {
+	var self = B;
+};
+A.prototype.method = function () {
+	var $this = this;
+	var self = A;
+	ref(this, self.prototype.staticMethod)();
+};
 	
-});
-var B = (function () {
-	
-	var _B = function () {
-		this.property = 11;
-	};
-	_B.prototype = A.prototype;
-	_B.staticProperty = 10;
-	_B.staticMethod = _B.prototype.staticMethod = function () {
-		var self = _B;
-		var parent = A;
-	};
-	_B.prototype.method = function () {
-		var $this = this;
-		var self = _B;
-		var parent = A;
-		ref(this, parent.prototype.staticMethod)();
-		ref(this, self.prototype.staticMethod)();
-		_B.staticMethod();
-	};
-	return _B;
-	
-});
+var B = function () {
+	this.property = 11;
+};
+B.prototype = obj.clone(A.prototype);
+B.staticProperty = 10;
+B.staticMethod = B.prototype.staticMethod = function () {
+	var self = B;
+	var parent = A;
+	self.staticCallMethod(); // self::staticCallMethod();
+	self.nonStaticMethod(); // self::nonStaticMethod();
+};
+B.prototype.method = function () {
+	var $this = this;
+	var self = B;
+	var parent = A;
+	ref(this, parent.prototype.staticMethod)(); // parent::staticMethod();
+	ref(this, self.prototype.staticMethod)(); // self::staticMethod();
+	ref(this, self.prototype.nonStaticMethod)(); // self::nonStaticMethod();
+	$this.nonStaticMethod(); // $this->nonStaticMethod();
+};

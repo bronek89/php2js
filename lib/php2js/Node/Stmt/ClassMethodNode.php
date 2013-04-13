@@ -9,14 +9,9 @@ use php2js\NameStack;
 class ClassMethodNode extends NodeAbstract {
 	public function compileNode(\PHPParser_Node_Stmt_ClassMethod $phpnode) {
 		$result = new CompilerResult();
+		$parent_phpnode = $this->getCompiler()->getNodeStackFront(1);
 		
-		if ($phpnode->isStatic()) {
-			$result->put("new obj.staticMethod(");
-		} else {
-			$result->put("new obj.method(");
-		}
-		
-		$result->put("'$phpnode->name', ");
+		$result->put("$parent_phpnode->name.prototype.$phpnode->name = ");
 		$result->put('function ' . $phpnode->name . '(');
 		
 		$this->getCompiler()->pushNameStack(new NameStack);
@@ -27,25 +22,20 @@ class ClassMethodNode extends NodeAbstract {
 		}
 		$result->putCollection($sub_params, ",");
 		
-		$parent_phpnode = $this->getCompiler()->getNodeStackFront(1);
-//		$result->put(') { var $this = this; var self = '.$parent_phpnode->name.'; ');
-		$result->put(') { var $this = this; var self = this; ');
+		$result->put(") { var \$this = this; var self = $parent_phpnode->name; ");
 		if ($parent_phpnode->extends) {
-//			$result->put('var parent = '.$parent_phpnode->extends.';');
-			$result->put('var parent = this["$parent"];');
-		} else {
-			$result->put('var parent = null;');
+			$result->put("var parent = $parent_phpnode->extends;");
 		}
 		
 		$this->getCompiler()->pushNameStack(new NameStack);
 		
 		foreach ($phpnode->stmts as $stmt) {
-			$result->put($this->getCompiler()->compileNode($stmt), "; \n");
+			$result->put($this->getCompiler()->compileNode($stmt), ";\n");
 		}
 		
 		$this->getCompiler()->popNameStack();
 		
-		$result->put('})');
+		$result->put('}');
 		return $result;
 	}
 }

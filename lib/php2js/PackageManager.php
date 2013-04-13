@@ -46,6 +46,9 @@ class PackageManager {
 			if ($package instanceof Package) {
 				$result = $package->getCompilerResult();
 				$filename = $this->getCompiler()->getResultDir() . $package->getName() . '.js';
+				$dirname = dirname($filename);
+			
+				mkdir($dirname);
 				file_put_contents($filename, implode("\n", $result->getLines()));
 			}
 		}

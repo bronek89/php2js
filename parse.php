@@ -6,7 +6,7 @@ $dir = dirname(__FILE__).'/';
 require 'lib/bootstrap.php';
 $parser = new PHPParser_Parser(new PHPParser_Lexer);
 	
-$testname = 'nodejs';
+$testname = 'classes';
 
 $compiler = new Compiler();
 $compiler->setResultDir($dir.'tests/'.$testname.'/build/');

@@ -1,4 +1,5 @@
 //package app
+var requirejs = require('requirejs');
 define([], function () {var $express=require('express');
 var $app=$express();
 $app.configure('development',function () {$app.engine('.html',(cons + swig));

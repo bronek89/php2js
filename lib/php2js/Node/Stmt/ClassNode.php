@@ -12,30 +12,21 @@ class ClassNode extends NodeAbstract {
 		
 		$result = new CompilerResult();
 //		$result->addLine('' . $phpnode->name . ' = obj.class([');
-		$result->addLine("$phpnode->name = function () {
-	oop.newInstance(this, $phpnode->name);
-};
-TheClass.\$name = '$phpnode->name';
-TheClass.\$base = ");
+		$result->addLine("$phpnode->name = function () {if (typeof this.__construct !== 'undefined') {this.__construct()}};");
 		
 		$deps = array();
 		
 		if ($phpnode->extends) {
-			$result->put($this->getCompiler()->compileNode($phpnode->extends), ';');
+			$baseClass = $this->getCompiler()->compileNode($phpnode->extends);
+			$result->put("$phpnode->name.protoype = obj.clone($baseClass.prototye);");
 			$deps[] = implode('', $phpnode->extends->parts);
-		} else {
-			$result->put('null;');
 		}
 		
-		$sub = new CompilerResult();
 		foreach ($phpnode->stmts as $stmt) {
-			$sub->add($this->getCompiler()->compileNode($stmt));
+			$statement = $this->getCompiler()->compileNode($stmt);
+			$result->put($statement, ";\n");
 		}
 		
-		$result->put("TheClass.\$ptt = {");
-		$result->putCollection($sub, ",");
-		$result->put("};");
-			
 		if ($phpnode->implements) {
 			$sub_impl = new CompilerResult();
 			foreach ($phpnode->implements as $extend) {
@@ -43,12 +34,11 @@ TheClass.\$base = ");
 				$deps[] = ($this->getCompiler()->compileNode($extend));
 			}
 			$result->putCollection($sub_impl, ",");
+		
+			$result->put("$phpnode->name.__implements =  = {");
+			$result->putCollection($sub_impl, ",");
+			$result->put("};");
 		}
-		
-		
-		$result->put("TheClass.\$int = {");
-		$result->putCollection($sub_impl, ",");
-		$result->put("};");
 		
 		$this->getCompiler()->getPackageManager()->getActive()->addNamedDefinition($phpnode->name, $deps, $result);
 		

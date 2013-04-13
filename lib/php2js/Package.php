@@ -70,7 +70,7 @@ class Package {
 		
 		$result_header = new CompilerResult();
 		$result_header->put('//package ', $this->name, "\n");
-		$result_header->put("var requirejs = require('requirejs');\n");
+		//$result_header->put("var requirejs = require('requirejs');\n");
 		$result_header->put('define([');
 		if ($this->requires) {
 			$result_header->put(implode(',', array_map(function ($v) {
